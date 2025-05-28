@@ -14,8 +14,13 @@ const COLOR_ACCENT = "#4caf50";
 
 const initialBoard = Array(9).fill(null);
 
+/**
+ * Checks for winner, returns "X" | "O" | null.
+ */
 // PUBLIC_INTERFACE
-function checkWinner(squares) {
+function checkWinner(
+  squares: (string | null)[]
+): "X" | "O" | null {
   /** Returns "X", "O", or null for no win yet. */
   const lines = [
     [0, 1, 2], // rows
@@ -35,14 +40,17 @@ function checkWinner(squares) {
       squares[a] === squares[b] &&
       squares[a] === squares[c]
     ) {
-      return squares[a];
+      return squares[a] as "X" | "O";
     }
   }
   return null;
 }
 
+/**
+ * Checks if board is full and no winner.
+ */
 // PUBLIC_INTERFACE
-function checkDraw(squares) {
+function checkDraw(squares: (string | null)[]): boolean {
   /** Returns true if board is full and no winner. */
   return squares.every((cell) => cell) && !checkWinner(squares);
 }
