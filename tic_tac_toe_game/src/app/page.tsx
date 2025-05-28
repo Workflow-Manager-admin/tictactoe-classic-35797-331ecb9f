@@ -1,101 +1,232 @@
-import Image from "next/image";
+"use client";
+import React, { useState } from "react";
 
-export default function Home() {
+/**
+ * Main TicTacToe Classic Container.
+ * Two players (X, O) take turns to play.
+ * Features: 3x3 grid, win/draw detection, turn indicator, and reset.
+ * Light, clean design with specified color scheme.
+ */
+
+const COLOR_PRIMARY = "#ffffff";
+const COLOR_SECONDARY = "#222222";
+const COLOR_ACCENT = "#4caf50";
+
+const initialBoard = Array(9).fill(null);
+
+// PUBLIC_INTERFACE
+function checkWinner(squares) {
+  /** Returns "X", "O", or null for no win yet. */
+  const lines = [
+    [0, 1, 2], // rows
+    [3, 4, 5],
+    [6, 7, 8],
+
+    [0, 3, 6], // cols
+    [1, 4, 7],
+    [2, 5, 8],
+
+    [0, 4, 8], // diagonals
+    [2, 4, 6],
+  ];
+  for (const [a, b, c] of lines) {
+    if (
+      squares[a] &&
+      squares[a] === squares[b] &&
+      squares[a] === squares[c]
+    ) {
+      return squares[a];
+    }
+  }
+  return null;
+}
+
+// PUBLIC_INTERFACE
+function checkDraw(squares) {
+  /** Returns true if board is full and no winner. */
+  return squares.every((cell) => cell) && !checkWinner(squares);
+}
+
+// PUBLIC_INTERFACE
+export default function TicTacToeClassic() {
+  const [board, setBoard] = useState([...initialBoard]);
+  const [isXNext, setIsXNext] = useState(true);
+  const winner = checkWinner(board);
+  const draw = checkDraw(board);
+
+  // PUBLIC_INTERFACE
+  function handleCellClick(idx) {
+    if (board[idx] || winner) return; // Ignore if cell filled or game over
+    const boardCopy = board.slice();
+    boardCopy[idx] = isXNext ? "X" : "O";
+    setBoard(boardCopy);
+    setIsXNext((prev) => !prev);
+  }
+
+  // PUBLIC_INTERFACE
+  function handleRestart() {
+    setBoard([...initialBoard]);
+    setIsXNext(true);
+  }
+
+  // PUBLIC_INTERFACE
+  function renderCell(idx) {
+    const value = board[idx];
+    let color;
+    if (value === "X") color = COLOR_SECONDARY;
+    else if (value === "O") color = COLOR_ACCENT;
+    else color = "transparent";
+    return (
+      <button
+        key={idx}
+        className="cell"
+        aria-label={`Tic-tac-toe cell ${idx + 1}`}
+        onClick={() => handleCellClick(idx)}
+        disabled={!!board[idx] || winner}
+        style={{
+          color,
+          background: COLOR_PRIMARY,
+          border: `2px solid #e0e0e0`,
+          fontWeight: "700",
+          fontSize: "2.3rem",
+          height: "70px",
+          width: "70px",
+          cursor: !board[idx] && !winner ? "pointer" : "not-allowed",
+          borderRadius: "10px",
+          transition: "background 0.1s, transform 0.08s",
+          outline: "none",
+          boxShadow: "0 0 0 1px rgba(34,34,34,0.06)",
+        }}
+      >
+        {value}
+      </button>
+    );
+  }
+
+  let statusMessage;
+  if (winner) {
+    statusMessage = (
+      <span>
+        <span style={{ color: winner === "X" ? COLOR_SECONDARY : COLOR_ACCENT, fontWeight: "700" }}>
+          Player {winner}
+        </span>{" "}
+        wins!
+      </span>
+    );
+  } else if (draw) {
+    statusMessage = <span>It’s a draw!</span>;
+  } else {
+    statusMessage = (
+      <span>
+        Next:
+        <span
+          style={{
+            color: isXNext ? COLOR_SECONDARY : COLOR_ACCENT,
+            fontWeight: "bold",
+            marginLeft: 6,
+          }}
+        >
+          Player {isXNext ? "X" : "O"}
+        </span>
+      </span>
+    );
+  }
+
   return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-semibold">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li>Save and see your changes instantly.</li>
-        </ol>
-
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:min-w-44"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
-        </div>
-      </main>
-      <footer className="row-start-3 flex gap-6 flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
+    <main
+      className="ttt-container"
+      style={{
+        minHeight: "100vh",
+        background: COLOR_PRIMARY,
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        justifyContent: "center",
+        gap: "2.5rem",
+        fontFamily: "var(--font-geist-sans), Arial, Helvetica, sans-serif",
+      }}
+    >
+      <h1
+        style={{
+          fontSize: "2.2rem",
+          fontWeight: 700,
+          letterSpacing: ".015em",
+          color: COLOR_SECONDARY,
+          marginBottom: "18px",
+        }}
+      >
+        Tic Tac Toe Classic
+      </h1>
+      <div
+        className="ttt-status"
+        style={{
+          fontSize: "1.25rem",
+          marginBottom: "6px",
+          fontWeight: 500,
+          minHeight: "1.75rem",
+        }}
+        data-testid="status-message"
+      >
+        {statusMessage}
+      </div>
+      <div
+        className="ttt-board"
+        style={{
+          display: "grid",
+          gridTemplateRows: "repeat(3, 1fr)",
+          gridTemplateColumns: "repeat(3, 1fr)",
+          gap: "14px",
+          marginBottom: "22px",
+        }}
+        role="grid"
+        aria-label="Tic-tac-toe board"
+      >
+        {Array.from({ length: 9 }, (_, idx) => renderCell(idx))}
+      </div>
+      <button
+        className="restart-btn"
+        onClick={handleRestart}
+        style={{
+          background: COLOR_ACCENT,
+          color: COLOR_PRIMARY,
+          padding: "0.6rem 1.7rem",
+          fontWeight: "600",
+          fontSize: "1.1rem",
+          borderRadius: "9px",
+          border: "none",
+          transition: "background 0.13s",
+          boxShadow: "0 1px 4px 0 #0001",
+          cursor: "pointer",
+          marginTop: "10px",
+        }}
+        aria-label="Restart game"
+      >
+        Restart
+      </button>
+      <footer
+        style={{
+          marginTop: "44px",
+          fontSize: "0.95rem",
+          color: "#888",
+          opacity: 0.85,
+        }}
+      >
+        <span>Built with Next.js &mdash; Two Player Classic Edition</span>
       </footer>
-    </div>
+      {/* Extra scoped styles for a11y highlight/focus, mobile, etc. */}
+      <style jsx global>{`
+        .ttt-board button.cell:focus-visible {
+          outline: 3px solid ${COLOR_ACCENT};
+          z-index: 2;
+        }
+        @media (max-width: 520px) {
+          .ttt-board button.cell {
+            width: 52px;
+            height: 52px;
+            font-size: 1.42rem;
+          }
+        }
+      `}</style>
+    </main>
   );
 }
