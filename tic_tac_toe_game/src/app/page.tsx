@@ -63,7 +63,7 @@ export default function TicTacToeClassic() {
   const draw = checkDraw(board);
 
   // PUBLIC_INTERFACE
-  function handleCellClick(idx) {
+  function handleCellClick(idx: number) {
     if (board[idx] || winner) return; // Ignore if cell filled or game over
     const boardCopy = board.slice();
     boardCopy[idx] = isXNext ? "X" : "O";
@@ -78,7 +78,7 @@ export default function TicTacToeClassic() {
   }
 
   // PUBLIC_INTERFACE
-  function renderCell(idx) {
+  function renderCell(idx: number) {
     const value = board[idx];
     let color;
     if (value === "X") color = COLOR_SECONDARY;
